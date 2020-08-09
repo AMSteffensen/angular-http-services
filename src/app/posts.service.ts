@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http'
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'
 
 import { Post } from './post.model';
 import { map } from 'rxjs/operators';
@@ -23,6 +23,28 @@ export class PostsService {
   fetchPosts() {
     return this.http
       .get<{ [key: string]: Post }>(
+        'https://app-angular-6affa.firebaseio.com//posts.json',{
+          headers: new HttpHeaders({ 'Custom-Header': 'Hello'}),
+          params: new HttpParams().set('print', 'pretty')
+        }
+      )
+      .pipe(
+        map(responseData => {
+          const postsArray: Post[] = [];
+          for (const key in responseData) {
+            if (responseData.hasOwnProperty(key)) {
+              postsArray.push({ ...responseData[key], id: key });
+            }
+          }
+          return postsArray;
+        })
+      );
+  }
+
+
+  clearPosts() {
+    return this.http
+      .delete<{ [key: string]: Post }>(
         'https://app-angular-6affa.firebaseio.com//posts.json'
       )
       .pipe(
